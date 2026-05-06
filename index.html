@@ -44,7 +44,12 @@ button:hover{opacity:0.9;}
   overflow:hidden;
   box-shadow:0 5px 15px rgba(0,0,0,0.1);
 }
-.card img{width:100%;height:200px;object-fit:cover;}
+.card img{
+  width:100%;
+  height:260px;
+  object-fit:contain;
+  background:#fff;
+}
 .card-content{padding:10px;}
 .out{color:red;font-weight:bold;}
 .modal{
@@ -213,7 +218,6 @@ function order(i){
   let msg=`Neue Bestellung A.N.D Design:%0AProdukt: ${p.name}%0APreis: ${p.price}€%0AName: ${name}%0AAdresse: ${address}%0AEmail: ${email}%0A%0AAND Design meldet sich bald.`;
 
   window.open(`mailto:andreasflieger5@gmail.com?subject=Bestellung&body=${msg}`);
-  window.open(`https://wa.me/4917623417717?text=${msg}`);
 
   alert("Bestellung eingegangen! AND Design meldet sich bald.");
 }

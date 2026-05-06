@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>A.N.D Design</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial;
+      background: #f3efe7;
+      color: #333;
+    }
+    header {
+      text-align: center;
+      padding: 40px;
+    }
+    h1 {
+      font-size: 40px;
+    }
+    .container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      padding: 20px;
+    }
+    .card {
+      background: white;
+      border-radius: 15px;
+      padding: 15px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    img {
+      width: 100%;
+      border-radius: 10px;
+    }
+    input, textarea, button {
+      width: 100%;
+      margin-top: 5px;
+      padding: 8px;
+    }
+    button {
+      background: #6b8f71;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <h1>A.N.D Design</h1>
+  <p>3D Prints • Nature • Minimal</p>
+</header>
+
+<div class="container" id="products"></div>
+
+<script>
+let products = [];
+
+function addProduct(name, price, image, desc) {
+  products.push({ name, price, image, desc });
+  render();
+}
+
+function render() {
+  let container = document.getElementById("products");
+  container.innerHTML = "";
+
+  products.forEach(p => {
+    container.innerHTML += `
+      <div class="card">
+        <img src="${p.image}" />
+        <h3>${p.name}</h3>
+        <p>${p.desc}</p>
+        <b>${p.price} €</b>
+      </div>
+    `;
+  });
+}
+
+// Demo Produkt
+addProduct("3D Vase", 12, "https://images.unsplash.com/photo-1588854337221-4cf9fa96059a", "Minimal Vase Design");
+
+</script>
+
+</body>
+</html>

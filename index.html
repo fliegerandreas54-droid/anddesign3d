@@ -1,257 +1,191 @@
-import React, { useState } from "react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { motion } from "framer-motion";
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>A.N.D Design</title>
+<style>
+body{
+  margin:0;
+  font-family:Arial, sans-serif;
+  background:#f3efe7;
+  color:#2f2f2f;
+}
+header{
+  text-align:center;
+  padding:30px;
+}
+h1{margin:0;font-size:42px;letter-spacing:2px;}
+.subtitle{color:#5a6b5d;}
+nav{
+  display:flex;
+  justify-content:center;
+  gap:10px;
+  padding:10px;
+}
+button{
+  background:#6b8f71;
+  color:white;
+  border:none;
+  padding:10px 14px;
+  border-radius:10px;
+  cursor:pointer;
+}
+button:hover{opacity:0.9;}
+.container{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+  gap:20px;
+  padding:20px;
+}
+.card{
+  background:white;
+  border-radius:15px;
+  overflow:hidden;
+  box-shadow:0 5px 15px rgba(0,0,0,0.1);
+}
+.card img{width:100%;height:200px;object-fit:cover;}
+.card-content{padding:10px;}
+.out{color:red;font-weight:bold;}
+.modal{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.5);
+  justify-content:center;
+  align-items:center;
+}
+.modal-box{
+  background:white;
+  padding:20px;
+  border-radius:15px;
+  width:320px;
+}
+input{
+  width:100%;
+  padding:8px;
+  margin:5px 0;
+}
+small{color:#666;}
+</style>
+</head>
+<body>
 
-export default function ANDDesignWebsite() {
-  const [isAdmin, setIsAdmin] = useState(false);
+<header>
+  <h1>A.N.D Design</h1>
+  <div class="subtitle">3D Prints • Minimal • Nature Inspired 🌿</div>
+</header>
 
-  const [login, setLogin] = useState({ user: "", password: "" });
+<nav>
+  <button onclick="openAdmin()">Admin</button>
+</nav>
 
-  const ADMIN_USER = "anddesign";
-  const ADMIN_PASS = "1234";
+<div class="container" id="products"></div>
 
-  const [logo, setLogo] = useState("");
+<!-- ADMIN MODAL -->
+<div class="modal" id="adminModal">
+  <div class="modal-box">
+    <h3>Admin Login</h3>
 
-  const [products, setProducts] = useState([]);
+    <div id="loginBox">
+      <input id="pass" type="password" placeholder="Passwort" />
+      <button onclick="login()">Login</button>
+    </div>
 
-  const [form, setForm] = useState({
-    name: "",
-    price: "",
-    quantity: "",
-    image: "",
-    description: "",
-  });
+    <div id="adminBox" style="display:none;">
+      <hr>
+      <h4>Produkt hinzufügen</h4>
 
-  const loginAdmin = () => {
-    console.log("LOGIN ATTEMPT:", login);
+      <input id="name" placeholder="Name" />
+      <input id="price" placeholder="Preis" />
+      <input id="qty" placeholder="Menge" />
 
-    const user = login.user?.trim();
-    const pass = login.password?.trim();
+      <small>Bild hochladen:</small>
+      <input type="file" id="imgFile" accept="image/*" />
 
-    if (user === ADMIN_USER && pass === ADMIN_PASS) {
-      setIsAdmin(true);
-    } else {
-      alert("Login falsch");
-    }
-  };
+      <button onclick="addProduct()">Hinzufügen</button>
+    </div>
 
-  const addProduct = () => {
-    if (!form.name || !form.price || !form.quantity) return;
+    <button onclick="closeAdmin()" style="margin-top:10px;">Schließen</button>
+  </div>
+</div>
 
-    setProducts([
-      ...products,
-      { ...form, quantity: Number(form.quantity) },
-    ]);
+<script>
+const PASS="20019442";
+let products=JSON.parse(localStorage.getItem("products")||"[]");
 
-    setForm({
-      name: "",
-      price: "",
-      quantity: "",
-      image: "",
-      description: "",
-    });
-  };
+function save(){
+  localStorage.setItem("products",JSON.stringify(products));
+}
 
-  const placeOrder = (index, orderData) => {
-    const product = products[index];
+function render(){
+  let c=document.getElementById("products");
+  c.innerHTML="";
 
-    const updated = [...products];
-
-    updated[index].quantity -= 1;
-
-    const filtered = updated.filter((p) => p.quantity > 0);
-    setProducts(filtered);
-
-    const message = `Neue Bestellung A.N.D Design:%0A%0AProdukt: ${product.name}%0APreis: ${product.price}€%0A%0AName: ${orderData.name}%0AAdresse: ${orderData.address}%0AEmail: ${orderData.email}`;
-
-    window.open(
-      `mailto:andreasflieger5@gmail.com?subject=Neue Bestellung A.N.D Design&body=${message}`
-    );
-
-    window.open(
-      `https://wa.me/4917623417717?text=${message}`
-    );
-
-    alert("Bestellung ausgelöst!");
-  };
-
-  // LOGIN SCREEN
-  if (!isAdmin) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-[#f3efe7]">
-        <Card className="p-8 rounded-2xl shadow-xl bg-white w-80">
-          <CardContent className="space-y-4">
-            <h2 className="text-2xl font-bold text-center">A.N.D Design Admin</h2>
-
-            <Input
-              placeholder="User"
-              value={login.user}
-              onChange={(e) =>
-                setLogin({ ...login, user: e.target.value })
-              }
-            />
-
-            <Input
-              type="password"
-              placeholder="Passwort"
-              value={login.password}
-              onChange={(e) =>
-                setLogin({ ...login, password: e.target.value })
-              }
-            />
-
-            <Button className="w-full" onClick={loginAdmin}>
-              Login
-            </Button>
-          </CardContent>
-        </Card>
+  products.forEach((p,i)=>{
+    c.innerHTML+=`
+    <div class='card'>
+      <img src='${p.img}' />
+      <div class='card-content'>
+        <h3>${p.name}</h3>
+        <p>${p.price} €</p>
+        <p>${p.qty>0?"Verfügbar: "+p.qty:"<span class='out'>Nicht verfügbar</span>"}</p>
+        <button onclick='order(${i})' ${p.qty<=0?"disabled":""}>Bestellen</button>
       </div>
-    );
+    </div>`;
+  });
+}
+
+function order(i){
+  let name=prompt("Name");
+  let address=prompt("Adresse");
+  let email=prompt("Email");
+
+  let p=products[i];
+  if(p.qty<=0)return;
+
+  p.qty--;
+  save();
+  render();
+
+  let msg=`Neue Bestellung A.N.D Design:%0AProdukt: ${p.name}%0APreis: ${p.price}€%0AName: ${name}%0AAdresse: ${address}%0AEmail: ${email}`;
+
+  window.open(`mailto:andreasflieger5@gmail.com?subject=Bestellung&body=${msg}`);
+  window.open(`https://wa.me/4917623417717?text=${msg}`);
+}
+
+function openAdmin(){document.getElementById("adminModal").style.display="flex";}
+function closeAdmin(){document.getElementById("adminModal").style.display="none";}
+
+function login(){
+  let p=document.getElementById("pass").value;
+  if(p===PASS){
+    document.getElementById("loginBox").style.display="none";
+    document.getElementById("adminBox").style.display="block";
+  } else alert("Falsch");
+}
+
+function addProduct(){
+  let file=document.getElementById("imgFile").files[0];
+
+  let reader=new FileReader();
+  reader.onload=function(){
+    products.push({
+      name:document.getElementById("name").value,
+      price:document.getElementById("price").value,
+      qty:parseInt(document.getElementById("qty").value),
+      img:reader.result
+    });
+
+    save();
+    render();
   }
 
-  // MAIN SHOP
-  return (
-    <div className="min-h-screen bg-[#f3efe7] text-gray-800 p-6">
-      <header className="text-center mb-10">
-        {logo && (
-          <img
-            src={logo}
-            alt="Logo"
-            className="mx-auto w-24 h-24 object-contain mb-4"
-          />
-        )}
-
-        <h1 className="text-5xl font-bold">A.N.D Design</h1>
-        <p className="mt-2">3D Prints • Nature • Minimal 🌿</p>
-      </header>
-
-      {/* ADMIN PANEL */}
-      <Card className="mb-10 bg-white/80 rounded-2xl shadow-lg">
-        <CardContent className="p-6 space-y-3">
-          <h2 className="text-xl font-semibold">Admin Panel</h2>
-
-          <Input
-            placeholder="Logo URL"
-            value={logo}
-            onChange={(e) => setLogo(e.target.value)}
-          />
-
-          <hr />
-
-          <Input
-            placeholder="Produktname"
-            value={form.name}
-            onChange={(e) => setForm({ ...form, name: e.target.value })}
-          />
-
-          <Textarea
-            placeholder="Beschreibung"
-            value={form.description}
-            onChange={(e) =>
-              setForm({ ...form, description: e.target.value })
-            }
-          />
-
-          <Input
-            placeholder="Bild URL"
-            value={form.image}
-            onChange={(e) => setForm({ ...form, image: e.target.value })}
-          />
-
-          <Input
-            placeholder="Preis"
-            value={form.price}
-            onChange={(e) => setForm({ ...form, price: e.target.value })}
-          />
-
-          <Input
-            placeholder="Menge"
-            value={form.quantity}
-            onChange={(e) =>
-              setForm({ ...form, quantity: e.target.value })
-            }
-          />
-
-          <Button onClick={addProduct}>Posten</Button>
-        </CardContent>
-      </Card>
-
-      {/* PRODUCTS */}
-      <div className="grid md:grid-cols-3 gap-6">
-        {products.map((p, i) => (
-          <motion.div
-            key={i}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-          >
-            <Card className="bg-white rounded-2xl shadow">
-              <CardContent className="p-4">
-                {p.image && (
-                  <img
-                    src={p.image}
-                    className="rounded-xl mb-3 w-full h-48 object-cover"
-                  />
-                )}
-
-                <h3 className="text-lg font-bold">{p.name}</h3>
-                <p>{p.description}</p>
-                <p className="font-bold">{p.price} €</p>
-                <p>Verfügbar: {p.quantity}</p>
-
-                <OrderForm
-                  onOrder={(data) => placeOrder(i, data)}
-                />
-              </CardContent>
-            </Card>
-          </motion.div>
-        ))}
-      </div>
-    </div>
-  );
+  if(file){reader.readAsDataURL(file);}
 }
 
-function OrderForm({ onOrder }) {
-  const [order, setOrder] = useState({
-    name: "",
-    address: "",
-    email: "",
-  });
+render();
+</script>
 
-  return (
-    <div className="space-y-2 mt-3">
-      <Input
-        placeholder="Name"
-        value={order.name}
-        onChange={(e) =>
-          setOrder({ ...order, name: e.target.value })
-        }
-      />
-
-      <Input
-        placeholder="Adresse"
-        value={order.address}
-        onChange={(e) =>
-          setOrder({ ...order, address: e.target.value })
-        }
-      />
-
-      <Input
-        placeholder="Email"
-        value={order.email}
-        onChange={(e) =>
-          setOrder({ ...order, email: e.target.value })
-        }
-      />
-
-      <Button
-        className="w-full"
-        onClick={() => onOrder(order)}
-      >
-        Bestellen
-      </Button>
-    </div>
-  );
-}
+</body>
+</html>

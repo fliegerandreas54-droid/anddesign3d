@@ -1,90 +1,140 @@
-<!DOCTYPE html>
-<html lang="de">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>A.N.D Design</title>
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial;
-      background: #f3efe7;
-      color: #333;
-    }
-    header {
-      text-align: center;
-      padding: 40px;
-    }
-    h1 {
-      font-size: 40px;
-    }
-    .container {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 20px;
-      padding: 20px;
-    }
-    .card {
-      background: white;
-      border-radius: 15px;
-      padding: 15px;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-    }
-    img {
-      width: 100%;
-      border-radius: 10px;
-    }
-    input, textarea, button {
-      width: 100%;
-      margin-top: 5px;
-      padding: 8px;
-    }
-    button {
-      background: #6b8f71;
-      color: white;
-      border: none;
-      cursor: pointer;
-    }
-  </style>
-</head>
+import React, { useState } from "react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { motion } from "framer-motion";
 
-<body>
+export default function ANDDesignWebsite() {
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [login, setLogin] = useState({ user: "", password: "" });
 
-<header>
-  <h1>A.N.D Design</h1>
-  <p>3D Prints • Nature • Minimal</p>
-</header>
+  const ADMIN_USER = "anddesign";
+  const ADMIN_PASS = "1234";
 
-<div class="container" id="products"></div>
+  const [logo, setLogo] = useState("");
 
-<script>
-let products = [];
-
-function addProduct(name, price, image, desc) {
-  products.push({ name, price, image, desc });
-  render();
-}
-
-function render() {
-  let container = document.getElementById("products");
-  container.innerHTML = "";
-
-  products.forEach(p => {
-    container.innerHTML += `
-      <div class="card">
-        <img src="${p.image}" />
-        <h3>${p.name}</h3>
-        <p>${p.desc}</p>
-        <b>${p.price} €</b>
-      </div>
-    `;
+  const [products, setProducts] = useState([]);
+  const [form, setForm] = useState({
+    name: "",
+    price: "",
+    quantity: "",
+    image: "",
+    description: "",
   });
+
+  const loginAdmin = () => {
+    if (login.user === ADMIN_USER && login.password === ADMIN_PASS) {
+      setIsAdmin(true);
+    } else {
+      alert("Login falsch");
+    }
+  };
+
+  const addProduct = () => {
+    if (!form.name || !form.price || !form.quantity) return;
+    setProducts([...products, { ...form, quantity: Number(form.quantity) }]);
+    setForm({ name: "", price: "", quantity: "", image: "", description: "" });
+  };
+
+  const placeOrder = (index, orderData) => {
+    const product = products[index];
+
+    const updated = [...products];
+    updated[index].quantity -= 1;
+
+    const filtered = updated.filter((p) => p.quantity > 0);
+    setProducts(filtered);
+
+    const message = `Neue Bestellung A.N.D Design:%0A%0AProdukt: ${product.name}%0APreis: ${product.price}€%0A%0AName: ${orderData.name}%0AAdresse: ${orderData.address}%0AEmail: ${orderData.email}`;
+
+    window.open(`mailto:andreasflieger5@gmail.com?subject=Neue Bestellung&body=${message}`);
+    window.open(`https://wa.me/4917623417717?text=${message}`);
+
+    alert("Bestellung gesendet!");
+  };
+
+  if (!isAdmin) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#f3efe7]">
+        <Card className="p-8 rounded-2xl shadow-xl bg-white">
+          <CardContent className="space-y-4">
+            <h2 className="text-2xl font-semibold text-center">A.N.D Design Admin</h2>
+            <Input placeholder="User" onChange={(e) => setLogin({ ...login, user: e.target.value })} />
+            <Input type="password" placeholder="Passwort" onChange={(e) => setLogin({ ...login, password: e.target.value })} />
+            <Button className="w-full" onClick={loginAdmin}>Login</Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-[#f3efe7] text-gray-800 p-6">
+
+      {/* Header mit Logo */}
+      <header className="text-center mb-10">
+        {logo && (
+          <img src={logo} alt="Logo" className="mx-auto w-24 h-24 object-contain mb-4" />
+        )}
+        <h1 className="text-5xl font-bold">A.N.D Design</h1>
+        <p className="mt-2">3D Prints • Minimal • Nature Inspired 🌿</p>
+      </header>
+
+      {/* Admin Panel */}
+      <Card className="mb-10 bg-white/80 rounded-2xl shadow-lg">
+        <CardContent className="p-6 space-y-3">
+          <h2 className="text-xl font-semibold">Admin Panel</h2>
+
+          <Input
+            placeholder="Logo URL (optional)"
+            value={logo}
+            onChange={(e) => setLogo(e.target.value)}
+          />
+
+          <hr />
+
+          <Input placeholder="Produktname" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+          <Textarea placeholder="Beschreibung" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
+          <Input placeholder="Bild URL" value={form.image} onChange={(e) => setForm({ ...form, image: e.target.value })} />
+          <Input placeholder="Preis" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} />
+          <Input placeholder="Menge" value={form.quantity} onChange={(e) => setForm({ ...form, quantity: e.target.value })} />
+
+          <Button onClick={addProduct}>Posten</Button>
+        </CardContent>
+      </Card>
+
+      {/* Produkte */}
+      <div className="grid md:grid-cols-3 gap-6">
+        {products.map((p, i) => (
+          <motion.div key={i} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+            <Card className="bg-white rounded-2xl shadow">
+              <CardContent className="p-4">
+                {p.image && <img src={p.image} className="rounded-xl mb-3 w-full h-48 object-cover" />}
+                <h3 className="text-lg font-bold">{p.name}</h3>
+                <p>{p.description}</p>
+                <p className="font-bold">{p.price} €</p>
+                <p>Verfügbar: {p.quantity}</p>
+
+                <OrderForm onOrder={(data) => placeOrder(i, data)} />
+              </CardContent>
+            </Card>
+          </motion.div>
+        ))}
+      </div>
+    </div>
+  );
 }
 
-// Demo Produkt
-addProduct("3D Vase", 12, "https://images.unsplash.com/photo-1588854337221-4cf9fa96059a", "Minimal Vase Design");
+function OrderForm({ onOrder }) {
+  const [order, setOrder] = useState({ name: "", address: "", email: "" });
 
-</script>
-
-</body>
-</html>
+  return (
+    <div className="space-y-2 mt-3">
+      <Input placeholder="Name" onChange={(e) => setOrder({ ...order, name: e.target.value })} />
+      <Input placeholder="Adresse" onChange={(e) => setOrder({ ...order, address: e.target.value })} />
+      <Input placeholder="Email" onChange={(e) => setOrder({ ...order, email: e.target.value })} />
+      <Button className="w-full" onClick={() => onOrder(order)}>Bestellen</Button>
+    </div>
+  );
+}

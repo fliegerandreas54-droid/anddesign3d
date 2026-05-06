@@ -59,7 +59,9 @@ button:hover{opacity:0.9;}
   background:white;
   padding:20px;
   border-radius:15px;
-  width:320px;
+  width:340px;
+  max-height:80vh;
+  overflow:auto;
 }
 input{
   width:100%;
@@ -67,6 +69,13 @@ input{
   margin:5px 0;
 }
 small{color:#666;}
+.order-box{
+  background:#f6f6f6;
+  padding:8px;
+  margin:5px 0;
+  border-radius:10px;
+  font-size:12px;
+}
 </style>
 </head>
 <body>
@@ -104,6 +113,10 @@ small{color:#666;}
       <input type="file" id="imgFile" accept="image/*" />
 
       <button onclick="addProduct()">Hinzufügen</button>
+
+      <hr>
+      <h4>Bestellungen</h4>
+      <div id="orders"></div>
     </div>
 
     <button onclick="closeAdmin()" style="margin-top:10px;">Schließen</button>
@@ -112,10 +125,39 @@ small{color:#666;}
 
 <script>
 const PASS="20019442";
+let isAdmin=false;
+
 let products=JSON.parse(localStorage.getItem("products")||"[]");
+let orders=JSON.parse(localStorage.getItem("orders")||"[]");
 
 function save(){
   localStorage.setItem("products",JSON.stringify(products));
+  localStorage.setItem("orders",JSON.stringify(orders));
+}
+
+function renderOrders(){
+  let o=document.getElementById("orders");
+  if(!o) return;
+  o.innerHTML="";
+
+  orders.forEach((ord,i)=>{
+    o.innerHTML+=`
+    <div class='order-box'>
+      <b>${ord.name}</b><br>
+      ${ord.product}<br>
+      ${ord.address}<br>
+      ${ord.email}<br>
+      <button onclick='deleteOrder(${i})' style='background:red;margin-top:5px'>Löschen</button>
+    </div>`;
+  });
+}
+
+function deleteOrder(i){
+  if(confirm("Bestellung löschen?")){
+    orders.splice(i,1);
+    save();
+    renderOrders();
+  }
 }
 
 function render(){
@@ -131,9 +173,18 @@ function render(){
         <p>${p.price} €</p>
         <p>${p.qty>0?"Verfügbar: "+p.qty:"<span class='out'>Nicht verfügbar</span>"}</p>
         <button onclick='order(${i})' ${p.qty<=0?"disabled":""}>Bestellen</button>
+        ${isAdmin?`<button style='background:red;margin-top:5px' onclick='deleteProduct(${i})'>Löschen</button>`:""}
       </div>
     </div>`;
   });
+}
+
+function deleteProduct(i){
+  if(confirm("Produkt löschen?")){
+    products.splice(i,1);
+    save();
+    render();
+  }
 }
 
 function order(i){
@@ -145,30 +196,46 @@ function order(i){
   if(p.qty<=0)return;
 
   p.qty--;
+
+  let orderData={
+    name,
+    address,
+    email,
+    product:p.name
+  };
+
+  orders.unshift(orderData);
+
   save();
   render();
+  renderOrders();
 
-  let msg=`Neue Bestellung A.N.D Design:%0AProdukt: ${p.name}%0APreis: ${p.price}€%0AName: ${name}%0AAdresse: ${address}%0AEmail: ${email}`;
+  let msg=`Neue Bestellung A.N.D Design:%0AProdukt: ${p.name}%0APreis: ${p.price}€%0AName: ${name}%0AAdresse: ${address}%0AEmail: ${email}%0A%0AAND Design meldet sich bald.`;
 
   window.open(`mailto:andreasflieger5@gmail.com?subject=Bestellung&body=${msg}`);
   window.open(`https://wa.me/4917623417717?text=${msg}`);
+
+  alert("Bestellung eingegangen! AND Design meldet sich bald.");
 }
 
-function openAdmin(){document.getElementById("adminModal").style.display="flex";}
+function openAdmin(){document.getElementById("adminModal").style.display="flex";renderOrders();}
 function closeAdmin(){document.getElementById("adminModal").style.display="none";}
 
 function login(){
   let p=document.getElementById("pass").value;
   if(p===PASS){
+    isAdmin=true;
     document.getElementById("loginBox").style.display="none";
     document.getElementById("adminBox").style.display="block";
+    render();
+    renderOrders();
   } else alert("Falsch");
 }
 
 function addProduct(){
   let file=document.getElementById("imgFile").files[0];
-
   let reader=new FileReader();
+
   reader.onload=function(){
     products.push({
       name:document.getElementById("name").value,
@@ -181,7 +248,7 @@ function addProduct(){
     render();
   }
 
-  if(file){reader.readAsDataURL(file);}
+  if(file) reader.readAsDataURL(file);
 }
 
 render();
